@@ -7,17 +7,17 @@ fn alphabeta<T: Board>(
     depth: usize,
     mut alpha: i64,
     mut beta: i64,
-    is_max: bool) -> i64 
-{
+    is_max: bool,
+) -> i64 {
     let result = board.evaluate();
     let mut score = result.score();
 
     if depth == 0 || result.is_over() {
         return match score.cmp(&0) {
-            Ordering::Less => { score - depth as i64 }
-            Ordering::Greater => { score + depth as i64 }
-            Ordering::Equal => { score }
-        }
+            Ordering::Less => score - depth as i64,
+            Ordering::Greater => score + depth as i64,
+            Ordering::Equal => score,
+        };
     }
     let moves = board.get_valid_moves(is_max);
 
@@ -28,7 +28,9 @@ fn alphabeta<T: Board>(
             score = score.max(alphabeta(board, depth - 1, alpha, beta, !is_max));
             board.unmake_move(&m);
             alpha = alpha.max(score);
-            if score >= beta { break }
+            if score >= beta {
+                break;
+            }
         }
         score
     } else {
@@ -38,7 +40,9 @@ fn alphabeta<T: Board>(
             score = score.min(alphabeta(board, depth - 1, alpha, beta, !is_max));
             board.unmake_move(&m);
             beta = beta.min(score);
-            if score <= alpha { break }
+            if score <= alpha {
+                break;
+            }
         }
         score
     }
@@ -46,7 +50,7 @@ fn alphabeta<T: Board>(
 
 struct MoveScore<T: Board> {
     game_move: <T as Board>::Move,
-    score: i64
+    score: i64,
 }
 
 /// Gets a vector of moves representing all equally good moves for the player
@@ -54,35 +58,51 @@ struct MoveScore<T: Board> {
 pub fn get_best_moves<T: Board + Clone>(
     mut board: T,
     mut max_depth: usize,
-    is_maximizers_turn: bool
+    is_maximizers_turn: bool,
 ) -> Vec<<T as Board>::Move> {
-    if max_depth == 0 { max_depth = usize::MAX }
-    if board.evaluate().is_over() { return vec![] }
+    if max_depth == 0 {
+        max_depth = usize::MAX
+    }
+    if board.evaluate().is_over() {
+        return vec![];
+    }
 
-    let mut moves: Vec<MoveScore<T>> =
-        board.get_valid_moves(is_maximizers_turn)
+    let mut moves: Vec<MoveScore<T>> = board
+        .get_valid_moves(is_maximizers_turn)
         .into_iter()
         .map(|m| {
             board.make_move(&m);
             let score = alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn);
             board.unmake_move(&m);
-            MoveScore{ game_move: m, score }
+            MoveScore {
+                game_move: m,
+                score,
+            }
         })
         .collect();
-    
+
     moves.sort_by(|a, b| {
-        if is_maximizers_turn { b.score.partial_cmp(&a.score).unwrap() }
-        else { a.score.partial_cmp(&b.score).unwrap() }
+        if is_maximizers_turn {
+            b.score.partial_cmp(&a.score).unwrap()
+        } else {
+            a.score.partial_cmp(&b.score).unwrap()
+        }
     });
 
     let high_score = moves[0].score;
     moves
         .into_iter()
-        .filter_map(|m| if m.score == high_score { Some(m.game_move) } else { None } ).collect()
+        .filter_map(|m| {
+            if m.score == high_score {
+                Some(m.game_move)
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 pub trait Board: Copy {
-
     type Move;
     type Result: Result;
 
@@ -105,7 +125,6 @@ pub trait Board: Copy {
     /// [Result::is_over] returns true OR the recursive depth
     /// has been reached.
     fn evaluate(&self) -> Self::Result;
-
 }
 
 pub trait Result {
