@@ -19,6 +19,7 @@ fn alphabeta<T: Board>(
             Ordering::Equal => score,
         };
     }
+
     let moves = board.get_valid_moves(is_max);
 
     if is_max {
@@ -55,11 +56,12 @@ struct MoveScore<T: Board> {
 
 /// Gets a vector of moves representing all equally good moves for the player
 /// specified by the `is_maximizers_turn` argument.
-pub fn get_best_moves<T: Board + Clone>(
+pub fn get_best_moves<T: Board>(
     mut board: T,
     mut max_depth: usize,
     is_maximizers_turn: bool,
 ) -> Vec<<T as Board>::Move> {
+    
     if max_depth == 0 {
         max_depth = usize::MAX
     }
