@@ -2,7 +2,7 @@
 mod tests {
 
     use multithread_minimax::example::tic_tac_toe_3x3::TTT;
-
+    use multithread_minimax::get_best_moves;
     #[test]
     fn win_game_x() {
         let mut game = TTT::new('x', 'o');
@@ -17,7 +17,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, true);
+        let moves = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -39,7 +39,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, true);
+        let moves = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -61,7 +61,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, true);
+        let moves = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -83,7 +83,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, true);
+        let moves = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -105,7 +105,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, false);
+        let moves = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -127,7 +127,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, false);
+        let moves = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -149,7 +149,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, false);
+        let moves = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -171,7 +171,7 @@ mod tests {
             None,
             None,
         ];
-        let moves = multithread_minimax::get_best_moves(game, 0, false);
+        let moves = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
