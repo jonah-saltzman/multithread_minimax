@@ -7,3 +7,15 @@ authors = ["Jonah Saltzman"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+
+[dev-dependencies]
+bencher = "0.1.5"
+
+[features]
+default=[]
+single_threaded = []
+multi_threaded = []
+
+[[bench]]
+name = "example"
+harness = false
