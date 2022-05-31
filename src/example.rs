@@ -143,7 +143,7 @@ pub mod tic_tac_toe_3x3 {
                 } else {
                     full = false;
                 }
-                if full && i == 2 {
+                if full && i / cond.len() == 1 {
                     return TttResult {
                         over: true,
                         score: 0,
