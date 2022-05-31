@@ -65,7 +65,7 @@ pub mod tic_tac_toe_3x3 {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.write_str("\n")?;
             for i in 0..=2 {
-                for j in (i * 3)..(i * 3 + 3) {
+                for j in i * 3..i * 3 + 3 {
                     let c = if let Some(p) = self.board[j]
                         { p }
                     else
