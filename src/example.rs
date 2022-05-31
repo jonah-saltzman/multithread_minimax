@@ -1,6 +1,6 @@
 
 pub mod ttt {
-    use crate::traits::traits::{Board, Result};
+    use crate::traits::game::{Board, Result};
     use std::fmt::{self, Display};
 
     const WIN_CONDITIONS: [[usize; 3]; 8] = [
@@ -14,14 +14,14 @@ pub mod ttt {
         [2, 4, 6]
     ];
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone, Copy)]
     pub struct TTT {
         maximizer: char,
         minimizer: char,
-        board: [Option<char>; 9]
+        pub board: [Option<char>; 9]
     }
 
-    #[derive(Debug)]
+    #[derive(Debug, Clone, Copy)]
     pub struct Move {
         pub player: char,
         pub to_position: usize
@@ -30,14 +30,14 @@ pub mod ttt {
     #[derive(Debug)]
     pub struct TttResult {
         over: bool,
-        score: f64
+        score: i64
     }
 
     impl Result for TttResult {
         fn is_game_over(&self) -> bool {
             self.over
         }
-        fn score(&self) -> f64 {
+        fn score(&self) -> i64 {
             self.score
         }
     }
@@ -50,6 +50,14 @@ pub mod ttt {
         pub fn board(&self) -> [Option<char>; 9] {
             self.board
         }
+
+        pub fn maximizer(&self) -> char {
+            self.maximizer
+        }
+
+        pub fn minimizer(&self) -> char {
+            self.minimizer
+        }
     }
 
     impl Display for TTT {
@@ -59,29 +67,25 @@ pub mod ttt {
             if let Err(_) = r { return r }
             for i in 0..=2 {
                 for j in (i * 3)..(i * 3 + 3) {
-                    let c = if let Some(p) = self.board[j] { p } else { char::from_digit(j as u32, 10).unwrap() };
+                    let c = if let Some(p) = self.board[j]
+                        { p }
+                    else
+                        { char::from_digit(j as u32, 10).unwrap() };
                     r = f.write_fmt(format_args!("{} ", c));
                     if let Err(_) = r { return r }
                 }
-                r = f.write_str("\n");
-                if let Err(_) = r { return r }
+                if i != 2 {
+                    r = f.write_str("\n");
+                    if let Err(_) = r { return r }
+                }
             }
             r
         }
     }
 
     impl Board for TTT {
-        type Player = char;
         type Move = Move;
         type Result = TttResult;
-
-        fn maximizer(&self) -> Self::Player {
-            self.maximizer
-        }
-
-        fn minimizer(&self) -> Self::Player {
-            self.minimizer
-        }
 
         fn get_valid_moves(&self, is_maximizer: bool) -> Vec<Self::Move> {
             let mut moves: Vec<Self::Move> = Vec::new();
@@ -94,11 +98,11 @@ pub mod ttt {
             moves
         }
 
-        fn make_move(&mut self, valid_move: Self::Move) -> () {
+        fn make_move(&mut self, valid_move: &Self::Move) -> () {
             self.board[valid_move.to_position] = Some(valid_move.player);
         }
 
-        fn unmake_move(&mut self, valid_move: Self::Move) -> () {
+        fn unmake_move(&mut self, valid_move: &Self::Move) -> () {
             self.board[valid_move.to_position] = None;
         }
 
@@ -121,18 +125,167 @@ pub mod ttt {
                     if win {
                         return TttResult{
                             over: true,
-                            score: if winner == self.maximizer() { 100.0 } else { -100.0 }
+                            score: if winner == self.maximizer() { 100 } else { -100 }
                         }
                     }
                 } else {
                     full = false;
                 }
                 if full && i == 2 {
-                    return TttResult { over: true, score: 0.0 }
+                    return TttResult { over: true, score: 0 }
                 }
             }
-            TttResult{ over: false, score: 0.0 }
+            TttResult{ over: false, score: 0 }
         }
     }
 
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::ttt::{TTT, Move};
+    use crate::traits::game::{Board, Result};
+
+    #[test]
+    fn new_game() {
+        let game = TTT::new('x', 'o');
+        assert_eq!(game.board(), [None; 9]);
+        assert_eq!(game.maximizer(), 'x');
+        assert_eq!(game.minimizer(), 'o');
+    }
+
+    #[test]
+    fn moves() {
+        let mut game = TTT::new('x', 'o');
+        game.make_move(&Move{ player: 'x', to_position: 4 });
+        assert_eq!(game.board(), [None, None, None, None, Some('x'), None, None, None, None]);
+        game.unmake_move(&Move{ player: 'x', to_position: 4 });
+        assert_eq!(game.board(), [None; 9]);
+    }
+
+    #[test]
+    fn get_moves() {
+        let mut game = TTT::new('x', 'o');
+        game.make_move(&Move{ player: 'x', to_position: 4 });
+        let moves = game.get_valid_moves(true);
+        assert_eq!(moves.len(), 8);
+        assert!(moves.iter().all(|m| m.player == 'x' && m.to_position != 4));
+    }
+
+    #[test]
+    fn eval() {
+        let mut game = TTT::new('x', 'o');
+        let mut result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{ player: 'x', to_position: 4 });
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{ player: 'o', to_position: 5 });
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{ player: 'x', to_position: 3 });
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{ player: 'o', to_position: 2 });
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{ player: 'x', to_position: 0 });
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{ player: 'o', to_position: 8 });
+        result = game.evaluate();
+        assert!(result.is_game_over());
+        assert_eq!(result.score(), -100);
+        game.unmake_move(&Move{ player: 'o', to_position: 5 });
+        game.make_move(&Move{ player: 'x', to_position: 5 });
+        result = game.evaluate();
+        assert!(result.is_game_over());
+        assert_eq!(result.score(), 100);
+        game.unmake_move(&Move{ player: 'x', to_position: 3 });
+        game.make_move(&Move{ player: 'o', to_position: 3 });
+        game.make_move(&Move{ player: 'x', to_position: 6 });
+        game.make_move(&Move{ player: 'x', to_position: 7 });
+        game.make_move(&Move{ player: 'o', to_position: 1 });
+        result = game.evaluate();
+        assert!(result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    #[test]
+    fn special1() {
+        let mut game = TTT::new('x', 'o');
+        game.board = [Some('x'), Some('x'), None, Some('o'), None, None, None, None, None];
+        let mut result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{player: 'x', to_position: 6});
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    #[test]
+    fn special2() {
+        let mut game = TTT::new('x', 'o');
+        game.board = [Some('x'), Some('x'), None,Some('o'), None, None, None, None, None];
+        let mut result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{player: 'o', to_position: 6});
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    #[test]
+    fn special3() {
+        let mut game = TTT::new('o', 'x');
+        game.board = [Some('x'), Some('x'), None, Some('o'), None, None, None, None, None];
+        let mut result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{player: 'x', to_position: 6});
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    #[test]
+    fn special4() {
+        let mut game = TTT::new('o', 'x');
+        game.board = [Some('x'), Some('x'), None, Some('o'), None, None, None, None, None];
+        let mut result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move{player: 'o', to_position: 6});
+        result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    #[test]
+    fn special5() {
+        let mut game = TTT::new('o', 'x');
+        game.board = [Some('x'), Some('x'), Some('o'), Some('o'), Some('o'), Some('x'), None, Some('o'), None];
+        let result = game.evaluate();
+        assert!(!result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    #[test]
+    fn game_over() {
+        let mut game = TTT::new('o', 'x');
+        game.board =
+            [Some('x'), Some('x'), Some('o'), Some('o'), Some('o'), Some('x'), Some('o'), Some('x'), Some('x')];
+        let result = game.evaluate();
+        assert!(result.is_game_over());
+        assert_eq!(result.score(), 0);
+    }
 }
