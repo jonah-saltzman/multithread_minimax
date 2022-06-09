@@ -10,20 +10,27 @@ mod tests {
         game.board = [
             Some('x'),
             Some('x'),
+            Some('x'),
             None,
             Some('o'),
             Some('o'),
+            Some('o'),
             None,
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, true, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 2);
+        assert_eq!(moves[0].to_position, 3);
     }
 
     #[test]
@@ -32,20 +39,27 @@ mod tests {
         game.board = [
             Some('x'),
             Some('x'),
+            Some('x'),
             None,
             Some('o'),
             Some('o'),
+            Some('o'),
             None,
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, true, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 5);
+        assert_eq!(moves[0].to_position, 7);
     }
 
     #[test]
@@ -54,20 +68,27 @@ mod tests {
         game.board = [
             Some('x'),
             Some('x'),
+            Some('x'),
             None,
+            Some('o'),
             Some('o'),
             None,
             None,
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, true, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 2);
+        assert_eq!(moves[0].to_position, 3);
     }
 
     #[test]
@@ -75,21 +96,28 @@ mod tests {
         let mut game = TTT::new('x', 'o');
         game.board = [
             Some('x'),
+            Some('x'),
             None,
             None,
             Some('o'),
             Some('o'),
+            Some('o'),
             None,
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, true, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 5);
+        assert_eq!(moves[0].to_position, 7);
     }
 
     #[test]
@@ -98,6 +126,10 @@ mod tests {
         game.board = [
             Some('o'),
             Some('o'),
+            Some('o'),
+            None,
+            Some('x'),
+            Some('x'),
             None,
             None,
             None,
@@ -105,13 +137,16 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, false, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 2);
+        assert_eq!(moves[0].to_position, 3);
     }
 
     #[test]
@@ -120,6 +155,10 @@ mod tests {
         game.board = [
             Some('o'),
             Some('o'),
+            Some('o'),
+            None,
+            Some('x'),
+            Some('x'),
             None,
             None,
             None,
@@ -127,13 +166,16 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, false, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 2);
+        assert_eq!(moves[0].to_position, 3);
     }
 
     #[test]
@@ -142,6 +184,10 @@ mod tests {
         game.board = [
             Some('o'),
             Some('o'),
+            Some('o'),
+            None,
+            Some('x'),
+            Some('x'),
             None,
             None,
             None,
@@ -149,13 +195,16 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, false, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 2);
+        assert_eq!(moves[0].to_position, 3);
     }
 
     #[test]
@@ -164,19 +213,26 @@ mod tests {
         game.board = [
             Some('o'),
             Some('o'),
+            Some('o'),
             Some('x'),
             None,
             None,
+            None,
             Some('x'),
             None,
             None,
             None,
+            Some('x'),
+            None,
+            None,
+            None,
+            None
         ];
         let moves = get_best_moves(game, 0, false, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 8);
+        assert_eq!(moves[0].to_position, 15);
     }
 }

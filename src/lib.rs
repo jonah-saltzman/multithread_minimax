@@ -1,5 +1,6 @@
-use std::cmp::Ordering;
+use std::cmp::Ordering as cmpOrdering;
 use std::{rc::Rc, cell::RefCell};
+use std::{sync::{atomic::{AtomicI64, Ordering}, Arc}, thread};
 
 pub mod example;
 
@@ -46,13 +47,13 @@ pub trait Result {
 
 #[derive(Debug)]
 struct Metadata {
-    moves: i64,
-    prunes: i64
+    moves: AtomicI64,
+    prunes: AtomicI64
 }
 
 impl Metadata {
     fn new() -> Metadata {
-        Metadata { moves: 0, prunes: 0 }
+        Metadata { moves: AtomicI64::new(0), prunes: AtomicI64::new(0) }
     }
 }
 
@@ -140,9 +141,9 @@ fn alphabeta<T: Board>(
     
     if depth == 0 || result.is_over() {
         return match score.cmp(&0) {
-            Ordering::Less => score - depth as i64,
-            Ordering::Greater => score + depth as i64,
-            Ordering::Equal => score,
+            cmpOrdering::Less => score - depth as i64,
+            cmpOrdering::Greater => score + depth as i64,
+            cmpOrdering::Equal => score,
         };
     }
 
@@ -188,9 +189,9 @@ fn alphabeta_refcell<T: Board>(
     
     if depth == 0 || result.is_over() {
         return match score.cmp(&0) {
-            Ordering::Less => score - depth as i64,
-            Ordering::Greater => score + depth as i64,
-            Ordering::Equal => score,
+            cmpOrdering::Less => score - depth as i64,
+            cmpOrdering::Greater => score + depth as i64,
+            cmpOrdering::Equal => score,
         };
     }
 

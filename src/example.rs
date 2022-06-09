@@ -3,22 +3,24 @@ pub mod tic_tac_toe_3x3 {
     use crate::{Board, Result};
     use std::fmt::{self, Display};
 
-    const WIN_CONDITIONS: [[usize; 3]; 8] = [
-        [0, 1, 2],
-        [3, 4, 5],
-        [6, 7, 8],
-        [0, 3, 6],
-        [1, 4, 7],
-        [2, 5, 8],
-        [0, 4, 8],
-        [2, 4, 6],
+    const WIN_CONDITIONS: [[usize; 4]; 10] = [
+        [0, 1, 2, 3],
+        [4, 5, 6, 7],
+        [8, 9, 10, 11],
+        [12, 13, 14, 15],
+        [0, 4, 8, 12],
+        [1, 5, 9, 13],
+        [2, 6, 10, 14],
+        [3, 7, 11, 15],
+        [0, 5, 10, 15],
+        [3, 6, 9, 12]
     ];
 
     #[derive(Debug, Clone, Copy)]
     pub struct TTT {
         maximizer: char,
         minimizer: char,
-        pub board: [Option<char>; 9],
+        pub board: [Option<char>; 16],
     }
 
     #[derive(Debug, Clone, Copy)]
@@ -47,11 +49,11 @@ pub mod tic_tac_toe_3x3 {
             TTT {
                 maximizer,
                 minimizer,
-                board: [None; 9],
+                board: [None; 16],
             }
         }
 
-        pub fn board(&self) -> [Option<char>; 9] {
+        pub fn board(&self) -> [Option<char>; 16] {
             self.board
         }
 
@@ -67,8 +69,8 @@ pub mod tic_tac_toe_3x3 {
     impl Display for TTT {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.write_str("\n")?;
-            for i in 0..=2 {
-                for j in i * 3..i * 3 + 3 {
+            for i in 0..=3 {
+                for j in i * 4..i * 4 + 4 {
                     let c = if let Some(p) = self.board[j] {
                         p
                     } else {
@@ -76,7 +78,7 @@ pub mod tic_tac_toe_3x3 {
                     };
                     f.write_fmt(format_args!("{} ", c))?;
                 }
-                if i != 2 {
+                if i != 3 {
                     f.write_str("\n")?;
                 }
             }
@@ -167,7 +169,7 @@ mod tests {
     #[test]
     fn new_game() {
         let game = TTT::new('x', 'o');
-        assert_eq!(game.board(), [None; 9]);
+        assert_eq!(game.board(), [None; 16]);
         assert_eq!(game.maximizer(), 'x');
         assert_eq!(game.minimizer(), 'o');
     }
@@ -181,13 +183,13 @@ mod tests {
         });
         assert_eq!(
             game.board(),
-            [None, None, None, None, Some('x'), None, None, None, None]
+            [None, None, None, None, Some('x'), None, None, None, None, None, None, None,  None, None, None, None]
         );
         game.unmake_move(&Move {
             player: 'x',
             to_position: 4,
         });
-        assert_eq!(game.board(), [None; 9]);
+        assert_eq!(game.board(), [None; 16]);
     }
 
     #[test]
@@ -198,7 +200,7 @@ mod tests {
             to_position: 4,
         });
         let moves = game.get_valid_moves(true);
-        assert_eq!(moves.len(), 8);
+        assert_eq!(moves.len(), 15);
         assert!(moves.iter().all(|m| m.player == 'x' && m.to_position != 4));
     }
 
@@ -248,42 +250,42 @@ mod tests {
             to_position: 8,
         });
         result = game.evaluate();
-        assert!(result.is_over());
-        assert_eq!(result.score(), -100);
-        game.unmake_move(&Move {
-            player: 'o',
-            to_position: 5,
+        assert!(!result.is_over());
+        assert_eq!(result.score(), 0);
+        game.make_move(&Move {
+            player: 'x',
+            to_position: 7
         });
         game.make_move(&Move {
             player: 'x',
-            to_position: 5,
+            to_position: 11
+        });
+        game.make_move(&Move {
+            player: 'x',
+            to_position: 15
         });
         result = game.evaluate();
         assert!(result.is_over());
         assert_eq!(result.score(), 100);
         game.unmake_move(&Move {
             player: 'x',
-            to_position: 3,
+            to_position: 15
         });
         game.make_move(&Move {
             player: 'o',
-            to_position: 3,
-        });
-        game.make_move(&Move {
-            player: 'x',
-            to_position: 6,
-        });
-        game.make_move(&Move {
-            player: 'x',
-            to_position: 7,
+            to_position: 6
         });
         game.make_move(&Move {
             player: 'o',
-            to_position: 1,
+            to_position: 10
+        });
+        game.make_move(&Move {
+            player: 'o',
+            to_position: 14
         });
         result = game.evaluate();
         assert!(result.is_over());
-        assert_eq!(result.score(), 0);
+        assert_eq!(result.score(), -100);
     }
 
     #[test]
@@ -299,6 +301,13 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let mut result = game.evaluate();
         assert!(!result.is_over());
@@ -325,6 +334,13 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let mut result = game.evaluate();
         assert!(!result.is_over());
@@ -351,6 +367,13 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let mut result = game.evaluate();
         assert!(!result.is_over());
@@ -377,6 +400,13 @@ mod tests {
             None,
             None,
             None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None
         ];
         let mut result = game.evaluate();
         assert!(!result.is_over());
@@ -396,6 +426,8 @@ mod tests {
         game.board = [
             Some('x'),
             Some('x'),
+            Some('x'),
+            Some('o'),
             Some('o'),
             Some('o'),
             Some('o'),
@@ -403,6 +435,36 @@ mod tests {
             None,
             Some('o'),
             None,
+            None,
+            None,
+            Some('o'),
+            None,
+            None
+        ];
+        let result = game.evaluate();
+        assert!(!result.is_over());
+        assert_eq!(result.score(), 0);
+    }
+
+    fn special6() {
+        let mut game = TTT::new('x', 'o');
+        game.board = [
+            Some('x'),
+            Some('x'),
+            Some('x'),
+            Some('o'),
+            Some('o'),
+            Some('o'),
+            Some('o'),
+            Some('x'),
+            Some('x'),
+            Some('x'),
+            Some('x'),
+            Some('x'),
+            None,
+            Some('o'),
+            None,
+            None
         ];
         let result = game.evaluate();
         assert!(!result.is_over());
@@ -415,15 +477,23 @@ mod tests {
         game.board = [
             Some('x'),
             Some('x'),
+            Some('x'),
+            Some('o'),
             Some('o'),
             Some('o'),
             Some('o'),
             Some('x'),
+            Some('x'),
+            Some('x'),
+            Some('x'),
             Some('o'),
             Some('x'),
+            Some('o'),
             Some('x'),
+            Some('x')
         ];
         let result = game.evaluate();
+        println!("result: {:?}", result);
         assert!(result.is_over());
         assert_eq!(result.score(), 0);
     }
