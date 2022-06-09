@@ -75,7 +75,7 @@ pub fn get_best_moves<T: Board>(
         return vec![];
     }
 
-    let metadata = Rc::new(RefCell::new(Metadata::new()));
+    let metadata = Rc::new(Metadata::new());
 
     let mut moves: Vec<MoveScore<T>> = board
         .get_valid_moves(is_maximizers_turn)
@@ -182,11 +182,13 @@ fn alphabeta_refcell<T: Board>(
     mut alpha: i64,
     mut beta: i64,
     is_max: bool,
-    metadata: Rc<RefCell<Metadata>>
+    metadata: Rc<Metadata>
 ) -> i64 {
     let result = board.evaluate();
     let mut score = result.score();
-    
+    {
+        metadata.moves.fetch_add(1, Ordering::Relaxed);
+    }
     if depth == 0 || result.is_over() {
         return match score.cmp(&0) {
             cmpOrdering::Less => score - depth as i64,
@@ -201,10 +203,11 @@ fn alphabeta_refcell<T: Board>(
         score = i64::MIN;
         for m in moves {
             board.make_move(&m);
-            score = score.max(alphabeta(board, depth - 1, alpha, beta, !is_max));
+            score = score.max(alphabeta_refcell(board, depth - 1, alpha, beta, !is_max, Rc::clone(&metadata)));
             board.unmake_move(&m);
             alpha = alpha.max(score);
             if score >= beta {
+                metadata.prunes.fetch_add(1, Ordering::Relaxed);
                 break;
             }
         }
@@ -213,10 +216,11 @@ fn alphabeta_refcell<T: Board>(
         score = i64::MAX;
         for m in moves {
             board.make_move(&m);
-            score = score.min(alphabeta(board, depth - 1, alpha, beta, !is_max));
+            score = score.min(alphabeta_refcell(board, depth - 1, alpha, beta, !is_max, Rc::clone(&metadata)));
             board.unmake_move(&m);
             beta = beta.min(score);
             if score <= alpha {
+                metadata.prunes.fetch_add(1, Ordering::Relaxed);
                 break;
             }
         }
