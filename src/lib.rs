@@ -1,6 +1,6 @@
 use std::cmp::Ordering as cmpOrdering;
-use std::{rc::Rc, cell::RefCell};
-use std::{sync::{atomic::{AtomicI64, Ordering}, Arc}, thread};
+use std::rc::Rc;
+use std::sync::atomic::{AtomicI64, Ordering};
 
 pub mod example;
 
@@ -46,13 +46,13 @@ pub trait Result {
 // }
 
 #[derive(Debug)]
-struct Metadata {
+pub struct Metadata {
     moves: AtomicI64,
     prunes: AtomicI64
 }
 
 impl Metadata {
-    fn new() -> Metadata {
+    pub fn new() -> Metadata {
         Metadata { moves: AtomicI64::new(0), prunes: AtomicI64::new(0) }
     }
 }
@@ -60,6 +60,65 @@ impl Metadata {
 /// Gets a vector of moves representing all equally good moves for the player
 /// specified by the `is_maximizers_turn` argument.
 #[cfg(feature = "single_threaded")]
+pub fn get_best_moves<T: Board>(
+    mut board: T,
+    mut max_depth: usize,
+    is_maximizers_turn: bool,
+    refcell: bool
+) -> (Vec<<T as Board>::Move>, Metadata) {
+
+    if max_depth == 0 {
+        max_depth = usize::MAX
+    }
+
+    let metadata = Rc::new(Metadata::new());
+
+    if board.evaluate().is_over() {
+        return (vec![], Rc::try_unwrap(metadata).unwrap());
+    }
+
+    let mut moves: Vec<MoveScore<T>> = board
+        .get_valid_moves(is_maximizers_turn)
+        .into_iter()
+        .map(|m| {
+            board.make_move(&m);
+            let metadata = Rc::clone(&metadata);
+            let score = if refcell {
+                alphabeta_refcell(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn, metadata)
+            } else {
+                alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn)
+            };
+            board.unmake_move(&m);
+            MoveScore {
+                game_move: m,
+                score,
+            }
+        })
+        .collect();
+
+    moves.sort_by(|a, b| {
+        if is_maximizers_turn {
+            b.score.partial_cmp(&a.score).unwrap()
+        } else {
+            a.score.partial_cmp(&b.score).unwrap()
+        }
+    });
+
+    let high_score = moves[0].score;
+
+    (moves
+        .into_iter()
+        .filter_map(|m| {
+            if m.score == high_score {
+                Some(m.game_move)
+            } else {
+                None
+            }
+        })
+        .collect(), Rc::try_unwrap(metadata).unwrap())
+}
+
+#[cfg(not(feature = "single_threaded"))]
 pub fn get_best_moves<T: Board>(
     mut board: T,
     mut max_depth: usize,
@@ -118,15 +177,6 @@ pub fn get_best_moves<T: Board>(
         })
         .collect()
 }
-
-// #[cfg(any(feature = "multi_threaded", feature="default"))]
-// pub fn get_best_moves_multi<T: Board>(
-//     mut board: T,
-//     mut max_depth: usize,
-//     is_maximizers_turn: bool,
-// ) -> Vec<<T as Board>::Move> {
-//     vec![]
-// }
 
 
 fn alphabeta<T: Board>(

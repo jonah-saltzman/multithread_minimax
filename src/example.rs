@@ -446,6 +446,7 @@ mod tests {
         assert_eq!(result.score(), 0);
     }
 
+    #[test]
     fn special6() {
         let mut game = TTT::new('x', 'o');
         game.board = [
@@ -460,7 +461,7 @@ mod tests {
             Some('x'),
             Some('x'),
             Some('x'),
-            Some('x'),
+            Some('o'),
             None,
             Some('o'),
             None,

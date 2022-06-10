@@ -9,10 +9,9 @@ authors = ["Jonah Saltzman"]
 [dependencies]
 
 [dev-dependencies]
-bencher = "0.1.5"
+criterion = "0.3.5"
 
 [features]
-default=[]
 single_threaded = []
 multi_threaded = []
 
