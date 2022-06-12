@@ -63,8 +63,7 @@ impl Metadata {
 pub fn get_best_moves<T: Board>(
     mut board: T,
     mut max_depth: usize,
-    is_maximizers_turn: bool,
-    refcell: bool
+    is_maximizers_turn: bool
 ) -> (Vec<<T as Board>::Move>, Metadata) {
 
     if max_depth == 0 {
@@ -83,11 +82,7 @@ pub fn get_best_moves<T: Board>(
         .map(|m| {
             board.make_move(&m);
             let metadata = Rc::clone(&metadata);
-            let score = if refcell {
-                alphabeta_refcell(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn, metadata)
-            } else {
-                alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn)
-            };
+            let score = alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn, metadata);
             board.unmake_move(&m);
             MoveScore {
                 game_move: m,
@@ -122,19 +117,18 @@ pub fn get_best_moves<T: Board>(
 pub fn get_best_moves<T: Board>(
     mut board: T,
     mut max_depth: usize,
-    is_maximizers_turn: bool,
-    refcell: bool
-) -> Vec<<T as Board>::Move> {
+    is_maximizers_turn: bool
+) -> (Vec<<T as Board>::Move>, Metadata) {
 
-    
     if max_depth == 0 {
         max_depth = usize::MAX
     }
-    if board.evaluate().is_over() {
-        return vec![];
-    }
 
     let metadata = Rc::new(Metadata::new());
+
+    if board.evaluate().is_over() {
+        return (vec![], Rc::try_unwrap(metadata).unwrap());
+    }
 
     let mut moves: Vec<MoveScore<T>> = board
         .get_valid_moves(is_maximizers_turn)
@@ -142,11 +136,7 @@ pub fn get_best_moves<T: Board>(
         .map(|m| {
             board.make_move(&m);
             let metadata = Rc::clone(&metadata);
-            let score = if refcell {
-                alphabeta_refcell(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn, metadata)
-            } else {
-                alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn)
-            };
+            let score = alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn, metadata);
             board.unmake_move(&m);
             MoveScore {
                 game_move: m,
@@ -163,10 +153,9 @@ pub fn get_best_moves<T: Board>(
         }
     });
 
-    println!("metadata: {:?}", metadata);
-
     let high_score = moves[0].score;
-    moves
+
+    (moves
         .into_iter()
         .filter_map(|m| {
             if m.score == high_score {
@@ -175,58 +164,10 @@ pub fn get_best_moves<T: Board>(
                 None
             }
         })
-        .collect()
+        .collect(), Rc::try_unwrap(metadata).unwrap())
 }
-
 
 fn alphabeta<T: Board>(
-    mut board: T,
-    depth: usize,
-    mut alpha: i64,
-    mut beta: i64,
-    is_max: bool,
-) -> i64 {
-    let result = board.evaluate();
-    let mut score = result.score();
-    
-    if depth == 0 || result.is_over() {
-        return match score.cmp(&0) {
-            cmpOrdering::Less => score - depth as i64,
-            cmpOrdering::Greater => score + depth as i64,
-            cmpOrdering::Equal => score,
-        };
-    }
-
-    let moves = board.get_valid_moves(is_max);
-
-    if is_max {
-        score = i64::MIN;
-        for m in moves {
-            board.make_move(&m);
-            score = score.max(alphabeta(board, depth - 1, alpha, beta, !is_max));
-            board.unmake_move(&m);
-            alpha = alpha.max(score);
-            if score >= beta {
-                break;
-            }
-        }
-        score
-    } else {
-        score = i64::MAX;
-        for m in moves {
-            board.make_move(&m);
-            score = score.min(alphabeta(board, depth - 1, alpha, beta, !is_max));
-            board.unmake_move(&m);
-            beta = beta.min(score);
-            if score <= alpha {
-                break;
-            }
-        }
-        score
-    }
-}
-
-fn alphabeta_refcell<T: Board>(
     mut board: T,
     depth: usize,
     mut alpha: i64,
@@ -253,7 +194,7 @@ fn alphabeta_refcell<T: Board>(
         score = i64::MIN;
         for m in moves {
             board.make_move(&m);
-            score = score.max(alphabeta_refcell(board, depth - 1, alpha, beta, !is_max, Rc::clone(&metadata)));
+            score = score.max(alphabeta(board, depth - 1, alpha, beta, !is_max, Rc::clone(&metadata)));
             board.unmake_move(&m);
             alpha = alpha.max(score);
             if score >= beta {
@@ -266,7 +207,7 @@ fn alphabeta_refcell<T: Board>(
         score = i64::MAX;
         for m in moves {
             board.make_move(&m);
-            score = score.min(alphabeta_refcell(board, depth - 1, alpha, beta, !is_max, Rc::clone(&metadata)));
+            score = score.min(alphabeta(board, depth - 1, alpha, beta, !is_max, Rc::clone(&metadata)));
             board.unmake_move(&m);
             beta = beta.min(score);
             if score <= alpha {

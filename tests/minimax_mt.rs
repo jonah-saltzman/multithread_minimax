@@ -1,8 +1,8 @@
 #[cfg(test)]
-#[cfg(feature="single_threaded")]
+#[cfg(feature="multi_threaded")]
 mod tests_single {
 
-    use multithread_minimax::example::tic_tac_toe_3x3::TTT;
+    use multithread_minimax::example::tic_tac_toe_4x4::TTT;
     use multithread_minimax::get_best_moves;
     #[test]
     fn win_game_x() {
@@ -25,7 +25,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true, false);
+        let (moves, _) = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -54,7 +54,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true, false);
+        let (moves, _) = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -83,7 +83,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true, false);
+        let (moves, _) = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -112,7 +112,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true, false);
+        let (moves, _) = get_best_moves(game, 0, true);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -141,7 +141,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false, false);
+        let (moves, _) = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -170,7 +170,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false, false);
+        let (moves, _) = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -199,7 +199,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false, false);
+        let (moves, _) = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
@@ -228,7 +228,7 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false, false);
+        let (moves, _) = get_best_moves(game, 0, false);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }

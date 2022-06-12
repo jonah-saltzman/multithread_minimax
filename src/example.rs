@@ -1,4 +1,4 @@
-pub mod tic_tac_toe_3x3 {
+pub mod tic_tac_toe_4x4 {
 
     use crate::{Board, Result};
     use std::fmt::{self, Display};
@@ -163,7 +163,7 @@ pub mod tic_tac_toe_3x3 {
 #[cfg(test)]
 mod tests {
 
-    use super::tic_tac_toe_3x3::{Move, TTT};
+    use super::tic_tac_toe_4x4::{Move, TTT};
     use crate::{Board, Result};
 
     #[test]
