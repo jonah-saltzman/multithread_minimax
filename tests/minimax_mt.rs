@@ -1,6 +1,6 @@
 mod tests_single {
 
-    use multithread_minimax::example::tic_tac_toe_4x4::TTT;
+    use multithread_minimax::example::four_by_four::*;
     use multithread_minimax::get_best_moves_multi;
     #[test]
     fn win_game_x() {

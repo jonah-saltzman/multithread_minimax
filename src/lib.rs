@@ -273,10 +273,10 @@ fn alphabeta_multi<T: Board>(
             score = score.max(alphabeta_multi(board, depth - 1, Arc::clone(&alpha), Arc::clone(&beta), !is_max, Arc::clone(&metadata)));
             board.unmake_move(&m);
             alpha.fetch_max(score, Ordering::AcqRel);
-            // if score >= beta.load(Ordering::Acquire) {
-            //     metadata.prunes.fetch_add(1, Ordering::Relaxed);
-            //     break;
-            // }
+            if score >= beta.load(Ordering::Acquire) {
+                metadata.prunes.fetch_add(1, Ordering::Relaxed);
+                break;
+            }
         }
         score
     } else {
@@ -286,10 +286,10 @@ fn alphabeta_multi<T: Board>(
             score = score.min(alphabeta_multi(board, depth - 1, Arc::clone(&alpha), Arc::clone(&beta), !is_max, Arc::clone(&metadata)));
             board.unmake_move(&m);
             beta.fetch_min(score, Ordering::AcqRel);
-            // if score <= alpha.load(Ordering::Acquire) {
-            //     metadata.prunes.fetch_add(1, Ordering::Relaxed);
-            //     break;
-            // }
+            if score <= alpha.load(Ordering::Acquire) {
+                metadata.prunes.fetch_add(1, Ordering::Relaxed);
+                break;
+            }
         }
         score
     }

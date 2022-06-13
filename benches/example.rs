@@ -1,7 +1,7 @@
 
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use multithread_minimax::*;
-use multithread_minimax::example::tic_tac_toe_4x4::*;
+use multithread_minimax::example::four_by_four::*;
 
 fn single_threaded(c: &mut Criterion) {
     let mut game = TTT::new('x', 'o');
