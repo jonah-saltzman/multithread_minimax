@@ -1,9 +1,7 @@
-#[cfg(test)]
-#[cfg(feature="multi_threaded")]
 mod tests_single {
 
     use multithread_minimax::example::tic_tac_toe_4x4::TTT;
-    use multithread_minimax::get_best_moves;
+    use multithread_minimax::get_best_moves_multi;
     #[test]
     fn win_game_x() {
         let mut game = TTT::new('x', 'o');
@@ -25,12 +23,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true);
+        let (moves, _) = get_best_moves_multi(game, 0, true, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -54,12 +52,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true);
+        let (moves, _) = get_best_moves_multi(game, 0, true, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 7);
+        assert_eq!(moves[0].game_move.to_position, 7);
     }
 
     #[test]
@@ -83,12 +81,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true);
+        let (moves, _) = get_best_moves_multi(game, 0, true, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -112,12 +110,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, true);
+        let (moves, _) = get_best_moves_multi(game, 0, true, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 7);
+        assert_eq!(moves[0].game_move.to_position, 7);
     }
 
     #[test]
@@ -141,12 +139,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false);
+        let (moves, _) = get_best_moves_multi(game, 0, false, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -170,12 +168,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false);
+        let (moves, _) = get_best_moves_multi(game, 0, false, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -199,12 +197,12 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false);
+        let (moves, _) = get_best_moves_multi(game, 0, false, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -228,11 +226,11 @@ mod tests_single {
             None,
             None
         ];
-        let (moves, _) = get_best_moves(game, 0, false);
+        let (moves, _) = get_best_moves_multi(game, 0, false, 0);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 15);
+        assert_eq!(moves[0].game_move.to_position, 15);
     }
 }

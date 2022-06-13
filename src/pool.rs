@@ -1,39 +1,38 @@
 use std::sync::{Arc, Mutex};
-use std::thread;
+use std::thread::{self, Thread};
 use std::sync::mpsc::{self, Receiver};
 use num_cpus;
 
 pub struct ThreadPool {
-    workers: Vec<Worker>,
     tx: mpsc::Sender<Job>
 }
 
 type Job = Box<dyn FnOnce() -> () + Send + 'static>;
 
-struct Worker {
-    id: usize,
-    handle: thread::JoinHandle<()>
-}
+struct Worker(thread::JoinHandle<()>);
 
 impl Worker {
-    fn new(id: usize, rx: Arc<Mutex<Receiver<Job>>>) -> Worker {
-        Worker { id, handle: thread::spawn(move || loop { 
-            let job = rx.lock().unwrap().recv().unwrap();
-            job();
-        }) }
+    fn new(rx: Arc<Mutex<Receiver<Job>>>, main: Arc<Thread>) -> Worker {
+        Worker (thread::spawn(move || loop {
+            let job = rx.lock().unwrap().recv();
+            if job.is_ok() {
+                job.unwrap()();
+                main.unpark();
+            }
+        }))
     }
 }
 
 impl ThreadPool {
-    pub fn new(mut size: usize) -> ThreadPool {
+    pub fn new(mut size: usize, main: Arc<Thread>) -> ThreadPool {
         if size == 0 { size = num_cpus::get(); }
-        let mut workers = Vec::with_capacity(size);
+        println!("using {} threads", size);
         let (tx, rx) = mpsc::channel();
         let rx = Arc::new(Mutex::new(rx));
-        for i in 0..size {
-            workers.push(Worker::new(i, Arc::clone(&rx)))
+        for _ in 0..size {
+            Worker::new(Arc::clone(&rx), Arc::clone(&main));
         }
-        ThreadPool { workers, tx }
+        ThreadPool { tx }
     }
 
     pub fn execute<F>(&self, f: F)
@@ -42,8 +41,4 @@ impl ThreadPool {
         {
             self.tx.send(Box::new(f)).unwrap();
         }
-
-    pub fn join(&self) {
-        
-    }
 }

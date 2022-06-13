@@ -1,5 +1,3 @@
-#[cfg(test)]
-#[cfg(feature="single_threaded")]
 mod tests_single {
 
     use multithread_minimax::example::tic_tac_toe_4x4::TTT;
@@ -30,7 +28,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -59,7 +57,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 7);
+        assert_eq!(moves[0].game_move.to_position, 7);
     }
 
     #[test]
@@ -88,7 +86,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -117,7 +115,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 7);
+        assert_eq!(moves[0].game_move.to_position, 7);
     }
 
     #[test]
@@ -146,7 +144,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -175,7 +173,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -204,7 +202,7 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 3);
+        assert_eq!(moves[0].game_move.to_position, 3);
     }
 
     #[test]
@@ -233,6 +231,6 @@ mod tests_single {
             println!("{:?}", moves[i]);
         }
         assert_eq!(moves.len(), 1);
-        assert_eq!(moves[0].to_position, 15);
+        assert_eq!(moves[0].game_move.to_position, 15);
     }
 }
