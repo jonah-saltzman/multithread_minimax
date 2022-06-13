@@ -1,0 +1,103 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'multithread_minimax'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--lib",
+          "--package=multithread_minimax"
+        ],
+        "filter": {
+          "name": "multithread_minimax",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test '3x3'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=3x3",
+          "--package=multithread_minimax"
+        ],
+        "filter": {
+          "name": "3x3",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'minimax_st'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=minimax_st",
+          "--package=multithread_minimax"
+        ],
+        "filter": {
+          "name": "minimax_st",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug integration test 'minimax_mt'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--test=minimax_mt",
+          "--package=multithread_minimax"
+        ],
+        "filter": {
+          "name": "minimax_mt",
+          "kind": "test"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug benchmark 'example'",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bench=example",
+          "--package=multithread_minimax"
+        ],
+        "filter": {
+          "name": "example",
+          "kind": "bench"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

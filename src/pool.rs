@@ -12,7 +12,7 @@ type Job = Box<dyn FnOnce() -> () + Send + 'static>;
 struct Worker(thread::JoinHandle<()>);
 
 impl Worker {
-    fn new(rx: Arc<Mutex<Receiver<Job>>>, main: Arc<Thread>) -> Worker {
+    fn new(id: usize, rx: Arc<Mutex<Receiver<Job>>>, main: Arc<Thread>) -> Worker {
         Worker (thread::spawn(move || loop {
             let job = rx.lock().unwrap().recv();
             if job.is_ok() {
@@ -29,8 +29,8 @@ impl ThreadPool {
         println!("using {} threads", size);
         let (tx, rx) = mpsc::channel();
         let rx = Arc::new(Mutex::new(rx));
-        for _ in 0..size {
-            Worker::new(Arc::clone(&rx), Arc::clone(&main));
+        for i in 0..size {
+            Worker::new(i, Arc::clone(&rx), Arc::clone(&main));
         }
         ThreadPool { tx }
     }

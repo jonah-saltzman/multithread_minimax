@@ -70,9 +70,9 @@ impl Display for TTT {
         for i in 0..=3 {
             for j in i * 4..i * 4 + 4 {
                 let c = if let Some(p) = self.board[j] {
-                    p
+                    format!("{: >2}", p.to_string())
                 } else {
-                    char::from_digit(j as u32, 10).unwrap()
+                    format!("{: >2}", j.to_string())
                 };
                 f.write_fmt(format_args!("{} ", c))?;
             }

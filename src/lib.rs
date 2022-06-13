@@ -2,14 +2,14 @@ mod pool;
 pub mod example;
 
 use std::cmp::Ordering as cmpOrdering;
-use std::fmt::Debug;
+use std::fmt::{Debug, Display};
 use std::rc::Rc;
 use std::sync::{Arc, Mutex, atomic::{AtomicI64, Ordering}};
 use pool::ThreadPool;
 use std::thread;
 
 
-pub trait Board: Copy + Send + 'static {
+pub trait Board: Copy + Send + Display + 'static {
     type Move: Copy + Send + Debug + 'static;
     type Result: Result;
 
@@ -134,6 +134,7 @@ pub fn get_best_moves_multi<T: Board>(
     if board.evaluate().is_over() {
         return (vec![], Arc::try_unwrap(metadata).unwrap());
     }
+    println!("using max depth: {}", max_depth);
     let main = Arc::new(thread::current());
     let pool = ThreadPool::new(threads, main);
     let starting_moves = board.get_valid_moves(is_maximizers_turn);
@@ -151,9 +152,11 @@ pub fn get_best_moves_multi<T: Board>(
                 max_depth,
                 Arc::clone(&alpha),
                 Arc::clone(&beta),
-                is_maximizers_turn,
+                !is_maximizers_turn,
                 metadata
             );
+            println!("{}", board);
+            println!("score: {}", score);
             moves.lock().unwrap().push(MoveScore { game_move: m, score });
         });
         board.unmake_move(&m);
@@ -252,11 +255,15 @@ fn alphabeta_multi<T: Board>(
     metadata: Arc<Metadata>
 ) -> i64 {
     let result = board.evaluate();
+    println!("{}", board);
+    println!("score: {}", result.score());
+    println!("over: {}", result.is_over());
     let mut score = result.score();
     {
         metadata.moves.fetch_add(1, Ordering::Relaxed);
     }
     if depth == 0 || result.is_over() {
+        println!("returning: {}", score);
         return match score.cmp(&0) {
             cmpOrdering::Less => score - depth as i64,
             cmpOrdering::Greater => score + depth as i64,
