@@ -3,8 +3,7 @@ use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use multithread_minimax::*;
 use multithread_minimax::example::tic_tac_toe_4x4::*;
 
-#[cfg(feature = "single_threaded")]
-fn criterion_benchmark(c: &mut Criterion) {
+fn single_threaded(c: &mut Criterion) {
     let mut game = TTT::new('x', 'o');
     game.board = [
         Some('x'),
@@ -27,8 +26,7 @@ fn criterion_benchmark(c: &mut Criterion) {
     c.bench_function("single threaded", |b| b.iter(|| println!("{:?}", get_best_moves(black_box(game), 0, false))));
 }
 
-#[cfg(not(feature = "single_threaded"))]
-fn criterion_benchmark(c: &mut Criterion) {
+fn multi_threaded(c: &mut Criterion) {
     let mut game = TTT::new('x', 'o');
     game.board = [
         Some('x'),
@@ -48,8 +46,8 @@ fn criterion_benchmark(c: &mut Criterion) {
         None,
         None
     ];
-    c.bench_function("single threaded no mut", |b| b.iter(|| get_best_moves(black_box(game), 0, true)));
+    c.bench_function("multi threaded", |b| b.iter(|| get_best_moves_multi(black_box(game), 0, true, 0)));
 }
 
-criterion_group!(benches, criterion_benchmark);
+criterion_group!(benches, single_threaded, multi_threaded);
 criterion_main!(benches);

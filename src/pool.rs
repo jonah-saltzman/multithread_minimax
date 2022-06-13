@@ -42,4 +42,8 @@ impl ThreadPool {
         {
             self.tx.send(Box::new(f)).unwrap();
         }
+
+    pub fn join(&self) {
+        
+    }
 }

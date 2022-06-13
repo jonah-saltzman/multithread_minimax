@@ -7,8 +7,8 @@ use std::sync::{Arc, Mutex, atomic::{AtomicI64, Ordering}};
 use pool::ThreadPool;
 
 
-pub trait Board: Copy {
-    type Move;
+pub trait Board: Copy + Send + 'static {
+    type Move: Copy + Send + 'static;
     type Result: Result;
 
     /// `make_move` should assume that valid_move will be a valid
@@ -62,7 +62,6 @@ impl Metadata {
 
 /// Gets a vector of moves representing all equally good moves for the player
 /// specified by the `is_maximizers_turn` argument.
-#[cfg(feature = "single_threaded")]
 pub fn get_best_moves<T: Board>(
     mut board: T,
     mut max_depth: usize,
@@ -116,7 +115,6 @@ pub fn get_best_moves<T: Board>(
         .collect(), Rc::try_unwrap(metadata).unwrap())
 }
 
-#[cfg(feature = "multi_threaded")]
 pub fn get_best_moves_multi<T: Board>(
     mut board: T,
     mut max_depth: usize,
@@ -138,11 +136,11 @@ pub fn get_best_moves_multi<T: Board>(
 
     let pool = ThreadPool::new(threads);
     let starting_moves = board.get_valid_moves(is_maximizers_turn);
-    let moves:Arc<Mutex<Vec<MoveScore<T>>>>;
+    let moves:Arc<Mutex<Vec<MoveScore<T>>>> = Arc::new(Mutex::new(vec![]));
     let moves_len = starting_moves.len();
     let complete: Arc<AtomicUsize> = Arc::new(AtomicUsize::new(0));
-    let check_done = |complete: Arc<AtomicUsize>| {
-        complete.into() == moves_len
+    let check_done = move |complete: Arc<AtomicUsize>| {
+        (complete.as_ref()).load(Ordering::SeqCst) == moves_len
     };
     for m in starting_moves {
         board.make_move(&m);
@@ -151,14 +149,16 @@ pub fn get_best_moves_multi<T: Board>(
         let complete = Arc::clone(&complete);
         pool.execute(move || { 
             let score = alphabeta_multi(board, max_depth, i64::MIN, i64::MAX, is_maximizers_turn, metadata);
-            moves.get_mut().unwrap().push(MoveScore { game_move: m, score });
+            moves.lock().unwrap().push(MoveScore { game_move: m, score });
+            complete.fetch_add(1, Ordering::Relaxed);
             if check_done(complete) {
-                
+                println!("done")
             }
+            ()
         })
     }
-
-    ()
+    
+    (vec![], Arc::try_unwrap(metadata).unwrap())
 }
 
 fn alphabeta<T: Board>(
