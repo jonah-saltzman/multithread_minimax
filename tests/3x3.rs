@@ -25,7 +25,7 @@ mod tests {
             None,
             None
         ];
-        let (moves, _) = get_best_moves_multi(game, 0, true, 0);
+        let (moves, _) = get_best_moves_multi(game, 0, true, 1);
         for i in 0..moves.len() {
             println!("{:?}", moves[i]);
         }

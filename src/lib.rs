@@ -9,7 +9,7 @@ use pool::ThreadPool;
 use std::thread;
 
 
-pub trait Board: Copy + Send + Display + 'static {
+pub trait Board: Copy + Send + Display + Debug + 'static {
     type Move: Copy + Send + Debug + 'static;
     type Result: Result;
 
@@ -155,8 +155,6 @@ pub fn get_best_moves_multi<T: Board>(
                 !is_maximizers_turn,
                 metadata
             );
-            println!("{}", board);
-            println!("score: {}", score);
             moves.lock().unwrap().push(MoveScore { game_move: m, score });
         });
         board.unmake_move(&m);
@@ -178,6 +176,9 @@ pub fn get_best_moves_multi<T: Board>(
             a.score.partial_cmp(&b.score).unwrap()
         }
     });
+
+    println!("final scores:");
+    moves.iter().for_each(|m| {println!("{:?}", m);});
 
     let high_score = moves[0].score;
 
@@ -255,20 +256,19 @@ fn alphabeta_multi<T: Board>(
     metadata: Arc<Metadata>
 ) -> i64 {
     let result = board.evaluate();
-    println!("{}", board);
-    println!("score: {}", result.score());
-    println!("over: {}", result.is_over());
     let mut score = result.score();
     {
         metadata.moves.fetch_add(1, Ordering::Relaxed);
     }
     if depth == 0 || result.is_over() {
-        println!("returning: {}", score);
-        return match score.cmp(&0) {
+        let ret = match score.cmp(&0) {
             cmpOrdering::Less => score - depth as i64,
             cmpOrdering::Greater => score + depth as i64,
             cmpOrdering::Equal => score,
         };
+        println!("{}", board);
+        println!("returning: {}", ret);
+        return ret
     }
 
     let moves = board.get_valid_moves(is_max);
