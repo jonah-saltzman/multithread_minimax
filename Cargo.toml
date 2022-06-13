@@ -7,6 +7,7 @@ authors = ["Jonah Saltzman"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+num_cpus = "1.13.1"
 
 [dev-dependencies]
 criterion = "0.3.5"
