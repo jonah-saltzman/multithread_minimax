@@ -66,18 +66,18 @@ impl Metadata {
 /// specified by the `is_maximizers_turn` argument.
 pub fn get_best_moves<T: Board>(
     mut board: T,
-    mut max_depth: usize,
+    mut max_depth: u16,
     is_maximizers_turn: bool
 ) -> (Vec<MoveScore<T>>, Metadata) {
 
     if max_depth == 0 {
-        max_depth = usize::MAX
+        max_depth = u16::MAX
     }
 
-    let metadata = Rc::new(Metadata::new());
+    let metadata = Arc::new(Metadata::new());
 
     if board.evaluate().is_over() {
-        return (vec![], Rc::try_unwrap(metadata).unwrap());
+        return (vec![], Arc::try_unwrap(metadata).unwrap());
     }
 
     let mut moves: Vec<MoveScore<T>> = board
@@ -85,8 +85,16 @@ pub fn get_best_moves<T: Board>(
         .into_iter()
         .map(|m| {
             board.make_move(&m);
-            let metadata = Rc::clone(&metadata);
-            let score = alphabeta(board, max_depth, i64::MIN, i64::MAX, !is_maximizers_turn, metadata);
+            let metadata = Arc::clone(&metadata);
+            let score = alphabeta_multi(
+                board,
+                0,
+                max_depth,
+                Arc::new(AtomicI64::new(i64::MIN)),
+                Arc::new(AtomicI64::new(i64::MAX)),
+                !is_maximizers_turn,
+                metadata
+            );
             board.unmake_move(&m);
             MoveScore {
                 game_move: m,
@@ -95,38 +103,41 @@ pub fn get_best_moves<T: Board>(
         })
         .collect();
 
-    moves.sort_by(|a, b| {
-        if is_maximizers_turn {
-            b.score.partial_cmp(&a.score).unwrap()
-        } else {
-            a.score.partial_cmp(&b.score).unwrap()
-        }
-    });
-
-    let high_score = moves[0].score;
-
-    (moves
-        .into_iter()
-        .filter_map(|m| {
-            if m.score == high_score {
-                Some(m)
+        moves.sort_by(|a, b| {
+            if is_maximizers_turn {
+                b.score.partial_cmp(&a.score).unwrap()
             } else {
-                None
+                a.score.partial_cmp(&b.score).unwrap()
             }
-        })
-        .collect(), Rc::try_unwrap(metadata).unwrap())
+        });
+    
+        println!("final scores:");
+        moves.iter().for_each(|m| {println!("{:?}", m);});
+    
+        let high_score = moves[0].score;
+    
+        (moves
+            .into_iter()
+            .filter_map(|m| {
+                if m.score == high_score {
+                    Some(m)
+                } else {
+                    None
+                }
+            })
+            .collect(), Arc::try_unwrap(metadata).unwrap())
 }
 
 pub fn get_best_moves_multi<T: Board>(
     mut board: T,
-    mut max_depth: usize,
+    mut max_depth: u16,
     is_maximizers_turn: bool,
     threads: usize
 ) -> (Vec<MoveScore<T>>, Metadata) {
 
 
     if max_depth == 0 {
-        max_depth = usize::MAX
+        max_depth = u16::MAX
     }
 
     let metadata = Arc::new(Metadata::new());
@@ -149,6 +160,7 @@ pub fn get_best_moves_multi<T: Board>(
         pool.execute(move || { 
             let score = alphabeta_multi(
                 board,
+                0,
                 max_depth,
                 Arc::clone(&alpha),
                 Arc::clone(&beta),
@@ -249,7 +261,8 @@ fn alphabeta<T: Board>(
 
 fn alphabeta_multi<T: Board>(
     mut board: T,
-    depth: usize,
+    depth: u16,
+    max_depth: u16,
     alpha: Arc<AtomicI64>,
     beta: Arc<AtomicI64>,
     is_max: bool,
@@ -260,13 +273,16 @@ fn alphabeta_multi<T: Board>(
     {
         metadata.moves.fetch_add(1, Ordering::Relaxed);
     }
-    if depth == 0 || result.is_over() {
+    if depth == max_depth || result.is_over() {
         let ret = match score.cmp(&0) {
-            cmpOrdering::Less => score - depth as i64,
-            cmpOrdering::Greater => score + depth as i64,
+            cmpOrdering::Less => score + (depth as i64),
+            cmpOrdering::Greater => score - (depth as i64),
             cmpOrdering::Equal => score,
         };
         println!("{}", board);
+        println!("depth as i64: {}", depth as i64);
+        println!("depth: {}", depth);
+        println!("score: {}", score);
         println!("returning: {}", ret);
         return ret
     }
@@ -277,10 +293,18 @@ fn alphabeta_multi<T: Board>(
         score = i64::MIN;
         for m in moves {
             board.make_move(&m);
-            score = score.max(alphabeta_multi(board, depth - 1, Arc::clone(&alpha), Arc::clone(&beta), !is_max, Arc::clone(&metadata)));
+            score = score.max(alphabeta_multi(
+                board,
+                depth + 1,
+                max_depth,
+                Arc::clone(&alpha),
+                Arc::clone(&beta),
+                false,
+                Arc::clone(&metadata)
+            ));
             board.unmake_move(&m);
-            alpha.fetch_max(score, Ordering::AcqRel);
-            if score >= beta.load(Ordering::Acquire) {
+            let alpha_max = alpha.fetch_max(score, Ordering::AcqRel).max(score);
+            if alpha_max >= beta.load(Ordering::Acquire) {
                 metadata.prunes.fetch_add(1, Ordering::Relaxed);
                 break;
             }
@@ -290,10 +314,17 @@ fn alphabeta_multi<T: Board>(
         score = i64::MAX;
         for m in moves {
             board.make_move(&m);
-            score = score.min(alphabeta_multi(board, depth - 1, Arc::clone(&alpha), Arc::clone(&beta), !is_max, Arc::clone(&metadata)));
+            score = score.min(alphabeta_multi(board,
+                depth + 1,
+                max_depth,
+                Arc::clone(&alpha),
+                Arc::clone(&beta),
+                true,
+                Arc::clone(&metadata)
+            ));
             board.unmake_move(&m);
-            beta.fetch_min(score, Ordering::AcqRel);
-            if score <= alpha.load(Ordering::Acquire) {
+            let beta_min = beta.fetch_min(score, Ordering::AcqRel).min(score);
+            if beta_min <= alpha.load(Ordering::Acquire) {
                 metadata.prunes.fetch_add(1, Ordering::Relaxed);
                 break;
             }
