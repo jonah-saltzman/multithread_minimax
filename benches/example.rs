@@ -23,7 +23,7 @@ fn single_threaded(c: &mut Criterion) {
         None,
         None
     ];
-    c.bench_function("single threaded", |b| b.iter(|| println!("{:?}", get_best_moves(black_box(game), 0, false))));
+    c.bench_function("single threaded", |b| b.iter(|| println!("{:?}", get_best_moves(black_box(game), 0, false, true))));
 }
 
 // fn multi_threaded(c: &mut Criterion) {
