@@ -13,6 +13,10 @@ fn multi_threaded(c: &mut Criterion) {
     c.bench_function("multi threaded", |b| b.iter(|| get_best_moves_multi(black_box(game), 0, true, 0)));
 }
 
+fn multi_threaded_no_workers(c: &mut Criterion) {
+    
+}
+
 fn get_board() -> TTT {
     let mut game = TTT::new('x', 'o');
     game.board = [
